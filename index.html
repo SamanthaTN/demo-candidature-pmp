@@ -255,7 +255,7 @@ const DEMO = {
 window.togglePresenter=()=>{
   state.presenter=!state.presenter;
   if(state.presenter){
-    state.membre=1; state.voie=1; state.cible=36;
+    state.membre=1; state.voie=3; state.cible=36;
     state.projets=DEMO.projets.map(p=>Object.assign({},p));
     state.form35=true; state.audite=null;
   } else {
@@ -391,7 +391,7 @@ function tip(txt){ return '<div class="tip"><div class="ic">i</div><div class="t
 
 function sAccueil(b){
   b.innerHTML =
-    tip("<b>À savoir :</b> le PMP n'est pas un examen où l'on s'inscrit puis on passe directement. Il faut d'abord <b>candidater</b> auprès du PMI et être <b>approuvé</b> (avec un risque d'audit) avant de réserver l'examen. Ce simulateur vous fait vivre chaque étape.")
+    tip("<b>À savoir :</b> le PMP n'est pas un examen où l'on s'inscrit puis on passe directement. Il faut d'abord <b>candidater</b> auprès du PMI et être <b>approuvé</b> (avec un risque d'audit) avant de réserver l'examen. Ce simulateur vous fait vivre chaque étape, <b>conformément à l'ECO du PMI de juillet 2026</b>.")
     + '<div class="panel" style="margin-bottom:6px"><b style="font-size:14px">Ce que vous allez parcourir</b>'
     + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin-top:12px;font-size:13px">'
     + ['Créer un compte PMI.org','Vérifier l\'éligibilité','Saisir vos coordonnées','Renseigner votre diplôme',
@@ -426,22 +426,26 @@ function syncMem(){ document.querySelectorAll("[data-mem]").forEach(el=>
 
 function sEligibilite(b){
   b.innerHTML =
-    tip("<b>L'éligibilité passe avant tout.</b> Vos <b>35 heures</b> sont déjà acquises grâce à votre formation SAMethod. Il reste à confirmer diplôme + expérience. Ces conditions n'ont pas changé avec l'examen de 2026.")
+    tip("<b>L'éligibilité passe avant tout.</b> L'ECO de juillet 2026 définit <b>quatre voies</b> : plus votre niveau d'études est élevé, moins de mois d'expérience sont exigés. Votre expérience doit avoir été acquise au cours des <b>10 dernières années</b>.")
     + '<div class="choices">'
-    + '<div class="choice" data-voie="1" onclick="pickVoie(1,36)"><span class="badge">✓ ma voie</span><h4>Voie 1 — Diplôme Bac+4</h4><p>Bachelor / bac+4 ou équivalent<br><b>36 mois</b> d\'expérience à diriger des projets<br>35 heures de formation</p></div>'
-    + '<div class="choice green" data-voie="2" onclick="pickVoie(2,60)"><span class="badge">✓ ma voie</span><h4>Voie 2 — Diplôme secondaire</h4><p>Bac / diplôme secondaire ou équivalent<br><b>60 mois</b> d\'expérience à diriger des projets<br>35 heures de formation</p></div>'
+    + '<div class="choice" data-voie="1" onclick="pickVoie(1,60)"><span class="badge">✓ ma voie</span><h4>Secondaire</h4><p>Diplôme de fin d\'études secondaires (CEC 4 / CITE 3-4)<br><b>60 mois</b> (5 ans) d\'expérience<br>35 heures de formation</p></div>'
+    + '<div class="choice" data-voie="2" onclick="pickVoie(2,48)"><span class="badge">✓ ma voie</span><h4>Niveau associé</h4><p>Diplôme de niveau associé, certificat supérieur ou programme technique avancé (CEC 5)<br><b>48 mois</b> (4 ans) d\'expérience<br>35 heures de formation</p></div>'
+    + '<div class="choice green" data-voie="3" onclick="pickVoie(3,36)"><span class="badge">✓ ma voie</span><h4>Premier cycle universitaire</h4><p>Licence / bachelor ou équivalent (CEC 6)<br><b>36 mois</b> (3 ans) d\'expérience<br>35 heures de formation</p></div>'
+    + '<div class="choice green" data-voie="4" onclick="pickVoie(4,24)"><span class="badge">✓ ma voie</span><h4>Programme accrédité GAC</h4><p>Licence ou 3<sup>e</sup> cycle délivré par un programme accrédité GAC du PMI<br><b>24 mois</b> (2 ans) d\'expérience<br>35 heures de formation</p></div>'
     + '</div>'
     + '<div class="note" id="voieInfo" style="margin-top:14px"></div>'
-    + '<p class="note warn" id="validhint" style="margin-top:6px">Choisissez votre voie pour continuer.</p>';
+    + '<p class="note warn" id="validhint" style="margin-top:6px">Choisissez votre voie pour continuer.</p>'
+    + '<p class="note">CEC = Cadre européen des certifications ; CITE = Classification internationale type de l\'éducation. Ces repères permettent au PMI d\'évaluer les diplômes de tous les pays.</p>';
   syncVoie();
 }
 window.pickVoie=(v,c)=>{ state.voie=v; state.cible=c; syncVoie();
-  const h=$("#validhint"); if(h){h.textContent="Voie "+v+" sélectionnée ✓";h.style.color="var(--green-ink)";} };
+  const h=$("#validhint"); if(h){h.textContent="Voie « "+VOIE_NOM[v]+" » sélectionnée ✓";h.style.color="var(--green-ink)";} };
+const VOIE_NOM = {1:"Secondaire", 2:"Niveau associé", 3:"Premier cycle universitaire", 4:"Programme accrédité GAC"};
 function syncVoie(){
   document.querySelectorAll("[data-voie]").forEach(el=>
     el.classList.toggle("sel", state.voie!==null && +el.dataset.voie===state.voie));
   const inf=$("#voieInfo");
-  if(inf&&state.voie) inf.innerHTML="Objectif d'expérience à atteindre : <b>"+state.cible+" mois</b> non chevauchants. Le compteur de l'étape Expérience vous aidera à suivre ce total.";
+  if(inf&&state.voie) inf.innerHTML="Voie « "+VOIE_NOM[state.voie]+" » : objectif de <b>"+state.cible+" mois</b> d'expérience non cumulée, acquise au cours des <b>10 dernières années</b>. Le compteur de l'étape Expérience vous aidera à suivre ce total.";
 }
 
 function sCoord(b){
@@ -454,7 +458,7 @@ function sCoord(b){
 }
 
 function sDiplome(b){
-  const seuil = state.voie===2 ? "diplôme secondaire (bac)" : "diplôme bac+4 / bachelor";
+  const seuil = VOIE_NOM[state.voie] || "votre voie";
   b.innerHTML =
     tip("<b>Gardez une copie numérique</b> de votre diplôme : elle sera demandée en cas d'audit. Il doit correspondre à votre voie ("+seuil+").")
     + '<div class="grid">'
@@ -464,15 +468,17 @@ function sDiplome(b){
     + f("Année d'obtention","text","annee","2016")
     + '</div>'
     + '<div class="field full" style="margin-top:14px"><label>Niveau déclaré</label><select id="niv">'
-    + '<option'+(state.voie===1?" selected":"")+'>Diplôme universitaire (bac+4 / bachelor)</option>'
-    + '<option'+(state.voie===2?" selected":"")+'>Diplôme secondaire (bac)</option>'
+    + '<option'+(state.voie===1?" selected":"")+'>Diplôme de fin d\'études secondaires (CEC 4)</option>'
+    + '<option'+(state.voie===2?" selected":"")+'>Diplôme de niveau associé / technique avancé (CEC 5)</option>'
+    + '<option'+(state.voie===3?" selected":"")+'>Diplôme de premier cycle universitaire (CEC 6)</option>'
+    + '<option'+(state.voie===4?" selected":"")+'>Diplôme d\'un programme accrédité GAC du PMI</option>'
     + '</select></div>';
 }
 
 /* ---- Étape Expérience : compteur + détecteur de qualité ---- */
 function sExperience(b){
   b.innerHTML =
-    tip("<b>Le cœur du dossier.</b> Décrivez chaque projet selon <b>Quoi&nbsp;–&nbsp;Comment&nbsp;–&nbsp;Résultat</b>, avec des verbes d'action en «&nbsp;je&nbsp;», des chiffres et un résultat mesurable. L'expérience doit être <b>non chevauchante</b>.")
+    tip("<b>Le cœur du dossier.</b> Décrivez chaque projet selon <b>Quoi&nbsp;–&nbsp;Comment&nbsp;–&nbsp;Résultat</b>, avec des verbes d'action en «&nbsp;je&nbsp;», des chiffres et un résultat mesurable. L'expérience doit être <b>non cumulée</b> (deux projets simultanés ne comptent qu'une fois) et acquise au cours des <b>10 dernières années</b>.")
     + '<div class="panel" id="cptPanel"></div>'
     + '<div style="margin-top:16px"><b style="font-size:14px">Ajouter un projet</b></div>'
     + '<div class="grid" style="margin-top:10px">'
@@ -556,7 +562,7 @@ window.loadExemple=()=>{
 window.setForm35=v=>{ state.form35=v; const h=document.getElementById("validhint35"); if(h) h.style.display=v?"none":"block"; };
 function sForm35(b){
   b.innerHTML =
-    tip("<b>Vos 35 heures sont validées</b> par votre formation SAMethod. Conservez précieusement votre <b>attestation (certificat de formation)</b> : c'est un justificatif clé en cas d'audit.")
+    tip("<b>Vos 35 heures sont validées</b> par votre formation SAMethod. Conservez précieusement votre <b>attestation (certificat de formation)</b> : c'est un justificatif clé en cas d'audit.") + '<div class="panel" style="background:var(--lightgreen);border-color:#BFE3BC;margin-bottom:14px"><b style="font-size:13px;color:var(--green-ink)">Bon à savoir — la dispense CAPM</b><div class="note" style="margin-top:5px;color:var(--ink)">Si vous détenez une certification <b>CAPM® active</b>, vous êtes <b>dispensé(e)</b> de documenter les 35 heures : elle vaut à elle seule les 35 heures de formation exigées.</div></div>'
     + '<div class="grid">'
     + '<div class="field"><label>Organisme de formation</label><input type="text" value="SAMethod" readonly></div>'
     + '<div class="field"><label>Heures de formation (contact hours)</label><input type="text" value="35 heures" readonly></div>'
@@ -573,7 +579,7 @@ function sRevue(b){
   b.innerHTML =
     tip("<b>Avant de soumettre :</b> relisez tout votre dossier d'un bloc. Raconte-t-il une histoire <b>cohérente</b> (rôles → responsabilités → livrables → résultats) ? Les dates se tiennent-elles ?")
     + '<div class="recap">'
-    + row("Voie d'éligibilité", state.voie? ("Voie "+state.voie+(state.voie===1?" (bac+4, 36 mois)":" (secondaire, 60 mois)")):"—")
+    + row("Voie d'éligibilité", state.voie? (VOIE_NOM[state.voie]+" — "+state.cible+" mois requis"):"—")
     + row("Statut PMI", state.membre===1?"Adhérent":state.membre===0?"Non-adhérent":"—")
     + row("Expérience déclarée", tot+" / "+state.cible+" mois", okMois?"ok":"no")
     + row("Nombre de projets", state.projets.length+" projet(s)")
@@ -635,11 +641,11 @@ window.clearAudit=()=>{
 
 function sPaiement(b){
   const membre = state.membre===1;
-  const montant = membre ? "425 $" : "675 $";
+  const montant = membre ? "tarif adhérent" : "tarif non-adhérent";
   b.innerHTML =
-    tip("<b>On ne paie qu'après l'approbation du dossier.</b> Deux moyens de régler : votre <b>carte bancaire</b>, ou un <b>bon d'examen (voucher)</b> — un code prépayé. Les frais varient selon votre statut et votre pays : vérifiez toujours le montant exact sur pmi.org.")
+    tip("<b>On ne paie qu'après l'approbation du dossier.</b> Deux moyens de régler : votre <b>carte bancaire</b>, ou un <b>bon d'examen (voucher)</b> — un code prépayé. <b>Le PMI applique une tarification régionale</b> et les montants évoluent : le tarif adhérent est nettement inférieur au tarif non-adhérent, mais <b>seul pmi.org affiche le montant exact qui vous sera appliqué</b>.")
     + '<div class="fee"><div><div class="lbl">Frais d\'examen '+(membre?"— tarif adhérent PMI":"— tarif non-adhérent")+'</div><div class="amt" id="feeAmt">'+montant+'</div></div>'
-    + '<div style="text-align:right;font-size:12px;color:#B9D2E6">'+(membre?"Votre adhésion vous fait<br>économiser sur ce tarif":"Adhérer au PMI réduirait<br>ce montant")+'</div></div>'
+    + '<div style="text-align:right;font-size:11.5px;color:#B9D2E6">'+(membre?"Votre adhésion réduit<br>le tarif d\'examen":"Adhérer au PMI réduirait<br>ce tarif")+'<br><b>Montant exact : pmi.org</b></div></div>'
     // Onglets moyen de paiement
     + '<div style="display:flex;gap:8px;margin:4px 0 14px">'
     + '<button class="btn" id="tabCard" onclick="payTab(\'card\')" style="flex:1;background:var(--blue);color:#fff;font-size:13px;padding:10px">💳 Payer par carte</button>'
@@ -652,7 +658,7 @@ function sPaiement(b){
     + '<div class="field"><label>Titulaire</label><input type="text" placeholder="Comme sur la carte"></div>'
     + '</div>'
     + '<p class="note warn">Ne saisissez jamais de vrai numéro de carte ici : ceci est une simulation. Le paiement réel se fait uniquement sur pmi.org.</p>'
-    + '<button class="btn go" style="margin-top:4px" onclick="payer(\''+montant+'\')">Payer '+montant+' (simulation)</button>'
+    + '<button class="btn go" style="margin-top:4px" onclick="payer(\'par carte\')">Payer par carte (simulation)</button>'
     + '</div>'
     // --- Panneau voucher ---
     + '<div id="panVou" style="display:none">'
@@ -669,7 +675,7 @@ function sPaiement(b){
     + '<li><span class="d">✕</span><div>Il est en général <b>non remboursable</b> une fois la demande initiée.</div></li>'
     + '<li><span class="d">✓</span><div><b>Vérifiez toujours le montant final</b> après application du bon, avant de valider.</div></li>'
     + '</ul>'
-    + '<button class="btn go" id="vouPay" style="margin-top:14px;display:none" onclick="payer(\'0 $ (bon appliqué)\')">Valider avec le bon (simulation)</button>'
+    + '<button class="btn go" id="vouPay" style="margin-top:14px;display:none" onclick="payer(\'bon appliqué\')">Valider avec le bon (simulation)</button>'
     + '</div>'
     + '<div id="payOk"></div>';
 }
@@ -684,8 +690,8 @@ window.applyVoucher=()=>{
   const code=($("#vouCode").value||"").trim();
   const msg=$("#vouMsg"), pay=$("#vouPay");
   if(!code){ msg.innerHTML='<p class="note warn">Saisissez d\'abord un code de bon.</p>'; pay.style.display="none"; return; }
-  msg.innerHTML='<div class="panel" style="margin-top:12px;background:var(--lightgreen);border-color:#BFE3BC"><b style="color:var(--green-ink)">✓ Bon appliqué (simulation)</b><div class="note" style="margin-top:5px;color:var(--ink)">Nouveau total : <b>0 $</b>. Dans la réalité, le total se met à jour selon la valeur du bon — vérifiez-le avant de confirmer.</div></div>';
-  $("#feeAmt").textContent="0 $"; pay.style.display="inline-block";
+  msg.innerHTML='<div class="panel" style="margin-top:12px;background:var(--lightgreen);border-color:#BFE3BC"><b style="color:var(--green-ink)">✓ Bon appliqué (simulation)</b><div class="note" style="margin-top:5px;color:var(--ink)">Nouveau total : <b>0</b>. Dans la réalité, le total se met à jour selon la valeur du bon — vérifiez-le avant de confirmer.</div></div>';
+  $("#feeAmt").textContent="0 (bon appliqué)"; pay.style.display="inline-block";
 };
 window.payer=(via)=>{ $("#payOk").innerHTML='<div class="status" style="margin-top:16px"><div class="ring" style="background:var(--green)">✓</div><h3>Paiement simulé accepté</h3><p>Règlement enregistré ('+(via||"")+'). Votre période d\'éligibilité d\'un an démarre : vous pouvez maintenant planifier l\'examen.</p></div>'; };
 
@@ -710,7 +716,7 @@ function sFin(b){
     + '<h3>Parcours de candidature terminé</h3>'
     + '<p>Vous venez de suivre l\'intégralité du dépôt de dossier PMP, de la création du compte jusqu\'à la planification de l\'examen.</p></div>'
     + '<div class="recap" style="margin-top:16px">'
-    + row("Voie", state.voie?("Voie "+state.voie):"—")
+    + row("Voie", state.voie?(VOIE_NOM[state.voie]+" ("+state.cible+" mois)"):"—")
     + row("Expérience", tot+" mois déclarés")
     + row("Projets décrits", state.projets.length+"")
     + row("35 heures", state.form35?"Confirmées (SAMethod)":"—")
