@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulateur de candidature PMP — SAMethod</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#132A45; --navy-2:#1C3A5C; --blue:#1D77B4; --blue-ink:#0F4A7A;
+  --green:#4CAB47; --green-ink:#2F7A2C; --coral:#E07856; --gold:#F4A623;
+  --paper:#EEF3F8; --card:#FFFFFF; --line:#D6E0EA; --ink:#16283C; --muted:#5D7186;
+  --lightblue:#DCE9F3; --lightgreen:#DCEEDB; --lightcoral:#FBE5DC; --lightgold:#FCEFD2;
+  --shadow:0 1px 2px rgba(19,42,69,.06),0 8px 30px rgba(19,42,69,.08);
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"IBM Plex Sans",system-ui,sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(1200px 500px at 50% -280px,rgba(29,119,180,.18),transparent 60%),
+    linear-gradient(180deg,#F5F8FC 0%,var(--paper) 100%);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:960px;margin:0 auto;padding:20px 18px 60px}
+
+/* ===== Chrome ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;align-items:baseline;gap:10px}
+.wordmark{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:26px;letter-spacing:-.5px;line-height:1}
+.wordmark .sa{color:var(--blue)} .wordmark .me{color:var(--green)} .wordmark .dot{color:var(--gold)}
+.tagline{font-style:italic;color:var(--green);font-size:12.5px;font-weight:500}
+.chip{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--coral);background:var(--lightcoral);
+  border:1px solid #F1C7B6;padding:5px 10px;border-radius:999px}
+
+/* ===== Stepper ===== */
+.stepper{position:relative;background:var(--navy);border-radius:var(--radius);padding:20px 22px 16px;
+  box-shadow:var(--shadow);overflow:hidden}
+.stepper::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(600px 120px at var(--glow,10%) 0%,rgba(244,166,35,.22),transparent 70%);
+  transition:--glow .5s}
+.steptitle{position:relative;color:#EAF2FA;font-family:"Bricolage Grotesque",sans-serif;font-weight:700;
+  font-size:13px;letter-spacing:.3px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.steptitle .count{font-family:"IBM Plex Mono",monospace;color:#9FC2DE;font-weight:600;font-size:12px}
+.track{position:relative;height:6px;background:rgba(255,255,255,.12);border-radius:999px}
+.fill{position:absolute;left:0;top:0;height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--blue),var(--gold) 70%,var(--green));
+  width:0;transition:width .5s cubic-bezier(.22,1,.36,1)}
+.dots{position:relative;display:flex;justify-content:space-between;margin-top:12px}
+.dot{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;min-width:0}
+.dot .b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+  font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:12px;
+  background:rgba(255,255,255,.10);color:#9FC2DE;border:1.5px solid transparent;transition:.35s}
+.dot.done .b{background:var(--green);color:#fff}
+.dot.active .b{background:#fff;color:var(--blue);border-color:var(--gold);box-shadow:0 0 0 4px rgba(244,166,35,.28)}
+.dot .lbl{font-size:9.5px;color:#8FB2CE;text-align:center;line-height:1.15;max-width:78px;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.dot.active .lbl{color:#EAF2FA;font-weight:600}
+@media(max-width:640px){ .dots{display:none} }
+
+/* ===== Card ===== */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-top:16px;overflow:hidden}
+.cardhead{padding:22px 26px 0}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;color:var(--blue)}
+.h{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:26px;line-height:1.15;
+  letter-spacing:-.4px;margin:6px 0 4px}
+.sub{color:var(--muted);font-size:14.5px;margin:0}
+.cardbody{padding:18px 26px 24px}
+@media(max-width:640px){.cardhead{padding:18px 18px 0}.cardbody{padding:16px 18px 20px}.h{font-size:22px}}
+
+/* ===== Tip / callouts ===== */
+.tip{display:flex;gap:12px;background:var(--lightgold);border:1px solid #F0D89A;
+  border-radius:12px;padding:13px 15px;margin:2px 0 18px}
+.tip .ic{flex:0 0 30px;height:30px;border-radius:50%;background:var(--gold);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:15px}
+.tip .t{font-size:13.5px;line-height:1.5}
+.tip .t b{color:var(--blue-ink)}
+.note{font-size:12.5px;color:var(--muted);margin-top:10px}
+.note.warn{color:var(--coral)}
+
+/* ===== Form ===== */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:12.5px;font-weight:600;color:var(--ink)}
+label .req{color:var(--coral)}
+input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);background:#FBFDFF;
+  border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;width:100%;transition:.15s}
+input::placeholder,textarea::placeholder{color:#9AACBD}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(29,119,180,.14);background:#fff}
+textarea{resize:vertical;min-height:96px;line-height:1.5}
+
+/* ===== Choice cards ===== */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.choices{grid-template-columns:1fr}}
+.choice{position:relative;border:1.5px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;
+  background:#FBFDFF;transition:.18s}
+.choice:hover{border-color:var(--blue);background:#fff}
+.choice.sel{border-color:var(--blue);background:var(--lightblue);box-shadow:0 0 0 3px rgba(29,119,180,.12)}
+.choice.sel.green{border-color:var(--green);background:var(--lightgreen);box-shadow:0 0 0 3px rgba(76,171,71,.14)}
+.choice h4{font-family:"Bricolage Grotesque",sans-serif;margin:0 0 4px;font-size:16px}
+.choice p{margin:0;font-size:12.5px;color:var(--muted);line-height:1.45}
+.choice .badge{position:absolute;top:12px;right:12px;font-family:"IBM Plex Mono",monospace;
+  font-size:11px;font-weight:600;color:var(--blue);opacity:0;transition:.18s}
+.choice.sel .badge{opacity:1}
+.choice.sel.green .badge{color:var(--green-ink)}
+
+/* ===== Counter / meter ===== */
+.panel{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#FBFDFF;margin-top:4px}
+.counter{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.counter .num{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:15px}
+.counter .num b{font-size:24px;color:var(--blue)}
+.counter .num b.ok{color:var(--green)}
+.bar{height:9px;background:#E7EEF5;border-radius:999px;overflow:hidden}
+.bar>i{display:block;height:100%;width:0;border-radius:999px;background:var(--blue);transition:width .4s}
+.bar>i.ok{background:var(--green)}
+.meter{display:flex;gap:5px;margin:10px 0 6px}
+.meter i{height:7px;flex:1;border-radius:999px;background:#E7EEF5;transition:.3s}
+.meter i.on1{background:var(--coral)} .meter i.on2{background:var(--gold)}
+.meter i.on3{background:#7FC24C} .meter i.on4{background:var(--green)}
+.mlabel{font-size:12.5px;font-weight:600}
+.checkline{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:7px}
+.checkline .m{width:15px;height:15px;border-radius:50%;display:grid;place-items:center;font-size:9px;
+  background:#E7EEF5;color:#9AACBD;flex:0 0 15px}
+.checkline.hit{color:var(--ink)} .checkline.hit .m{background:var(--green);color:#fff}
+
+/* project list */
+.plist{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.pitem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;
+  padding:9px 12px;background:#fff;font-size:13px}
+.pitem .nm{font-weight:600;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pitem .mo{font-family:"IBM Plex Mono",monospace;color:var(--blue);font-weight:600}
+.pitem button{border:none;background:var(--lightcoral);color:var(--coral);border-radius:7px;
+  width:26px;height:26px;cursor:pointer;font-size:14px;line-height:1}
+.pitem .ap{font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;background:var(--lightblue);color:var(--blue-ink)}
+
+/* recap */
+.recap{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.recap .row{display:flex;justify-content:space-between;gap:12px;padding:11px 15px;font-size:13.5px;border-top:1px solid var(--line)}
+.recap .row:first-child{border-top:none}
+.recap .row .k{color:var(--muted)} .recap .row .v{font-weight:600;text-align:right}
+.recap .row .v.ok{color:var(--green-ink)} .recap .row .v.no{color:var(--coral)}
+
+/* status blocks */
+.status{text-align:center;padding:14px 10px}
+.status .ring{width:74px;height:74px;border-radius:50%;margin:0 auto 14px;display:grid;place-items:center;
+  font-size:32px;color:#fff}
+.status h3{font-family:"Bricolage Grotesque",sans-serif;margin:0 0 6px;font-size:20px}
+.status p{margin:0 auto;max-width:460px;color:var(--muted);font-size:14px;line-height:1.5}
+.spin{width:20px;height:20px;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;
+  animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.doclist{list-style:none;padding:0;margin:14px auto 0;max-width:460px;text-align:left}
+.doclist li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;padding:8px 0;border-top:1px dashed var(--line)}
+.doclist li:first-child{border-top:none}
+.doclist .d{flex:0 0 22px;height:22px;border-radius:6px;background:var(--lightblue);color:var(--blue);
+  display:grid;place-items:center;font-size:12px;font-weight:700}
+
+/* fee */
+.fee{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--navy);
+  color:#fff;border-radius:12px;padding:16px 18px;margin:6px 0 14px}
+.fee .amt{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:26px}
+.fee .lbl{font-size:12.5px;color:#B9D2E6}
+
+/* ===== Nav ===== */
+.nav{display:flex;justify-content:space-between;gap:12px;padding:16px 26px 22px;border-top:1px solid var(--line);background:#FBFDFF}
+@media(max-width:640px){.nav{padding:14px 18px 18px}}
+button.btn{font-family:inherit;font-weight:600;font-size:14px;border-radius:10px;padding:12px 20px;
+  cursor:pointer;border:1.5px solid transparent;transition:.16s}
+.btn.prev{background:#fff;border-color:var(--line);color:var(--muted)}
+.btn.prev:hover{border-color:var(--blue);color:var(--blue)}
+.btn.prev:disabled{opacity:.4;cursor:not-allowed}
+.btn.next{background:var(--blue);color:#fff;box-shadow:0 6px 16px rgba(29,119,180,.28)}
+.btn.next:hover{background:var(--blue-ink)}
+.btn.go{background:var(--green);color:#fff;box-shadow:0 6px 16px rgba(76,171,71,.3)}
+.btn.go:hover{background:var(--green-ink)}
+.btn.ghost{background:var(--lightblue);color:var(--blue-ink);font-size:13px;padding:9px 14px}
+.btn.ghost:hover{background:#CFE0F0}
+
+.disclaimer{text-align:center;color:var(--muted);font-size:12px;margin-top:20px;line-height:1.5}
+.disclaimer a{color:var(--blue)}
+.reveal{animation:rise .4s cubic-bezier(.22,1,.36,1)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">
+      <div>
+        <div class="wordmark"><span class="sa">SA</span><span class="me">Method</span><span class="dot">.</span></div>
+        <div class="tagline">Step into The Light!</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button id="presToggle" onclick="togglePresenter()" style="font-family:'IBM Plex Sans',sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:7px 13px;display:flex;align-items:center;gap:7px">
+        <span id="presDot" style="width:9px;height:9px;border-radius:50%;background:#C6D2DE;display:inline-block"></span>Mode présentateur
+      </button>
+      <div class="chip">Simulation · aucune donnée réelle</div>
+    </div>
+  </div>
+
+  <div class="stepper" id="stepper">
+    <div class="steptitle"><span id="stName">Bienvenue</span><span class="count" id="stCount"></span></div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="dots" id="dots"></div>
+  </div>
+
+  <div class="card">
+    <div class="cardhead"><div class="eyebrow" id="eyebrow"></div><h1 class="h" id="title"></h1><p class="sub" id="sub"></p></div>
+    <div class="cardbody" id="body"></div>
+    <div class="nav">
+      <button class="btn prev" id="prev">← Précédent</button>
+      <button class="btn next" id="next">Continuer →</button>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    Ceci est un <b>simulateur pédagogique SAMethod</b> reproduisant le déroulé de la candidature — ce n'est pas le site du PMI.<br>
+    Aucune donnée n'est enregistrée ni transmise. Pour candidater réellement, rendez-vous sur <a href="https://www.pmi.org" target="_blank" rel="noopener">pmi.org</a>. Frais et délais y sont indiqués et peuvent évoluer.
+  </p>
+</div>
+
+<script>
+"use strict";
+/* ---------------- Candidat fil-rouge (mode présentateur) ---------------- */
+const DEMO = {
+  email:"candidat.demo@exemple.com", nom:"Trabelsi", prenom:"Sami",
+  pays:"Tunisie", ville:"Tunis", adr:"Avenue de la Liberté", tel:"+216 20 000 000",
+  dip:"Master en management", etab:"Université de Tunis", paysdip:"Tunisie", annee:"2015",
+  fintitule:"Préparation à la certification PMP", fref:"SAM-PMP-2026-014",
+  projets:[
+    {nom:"Déploiement d'un nouvel outil interne", role:"Chef de projet", debut:"01/2021", fin:"12/2021", mois:12, approche:"Prédictif",
+     desc:"En tant que chef de projet, j'ai planifié et piloté le déploiement d'un nouvel outil interne (approche prédictive). J'ai défini le périmètre et le WBS, géré un budget de 120 K€ et un planning de 12 mois, coordonné une équipe de 8 personnes et animé les parties prenantes. J'ai suivi les risques et le contrôle des changements. Résultat : outil déployé dans les délais, adopté par 95% des utilisateurs."},
+    {nom:"Refonte d'un processus métier", role:"Coordinateur projet", debut:"01/2022", fin:"10/2022", mois:10, approche:"Hybride",
+     desc:"J'ai coordonné la refonte d'un processus métier (approche hybride). J'ai cadré les besoins avec les parties prenantes, planifié les jalons, animé des itérations de validation et géré un budget de 60 K€. Résultat : temps de traitement réduit de 30%, satisfaction interne en nette hausse."},
+    {nom:"Mise en place d'un nouveau service", role:"Chef de projet", debut:"11/2022", fin:"06/2023", mois:8, approche:"Agile",
+     desc:"J'ai dirigé la mise en place d'un nouveau service en mode agile. J'ai construit et priorisé le backlog avec le Product Owner, animé les sprints et les rétrospectives, et suivi la vélocité de l'équipe. Résultat : premier incrément livré en 6 semaines, service lancé avec 3 semaines d'avance."},
+    {nom:"Programme d'amélioration continue", role:"Pilote", debut:"07/2023", fin:"12/2023", mois:6, approche:"Hybride",
+     desc:"J'ai piloté un programme d'amélioration continue (approche hybride). J'ai défini les indicateurs, coordonné plusieurs équipes, géré les risques et animé des points de suivi réguliers. Résultat : 12 actions mises en œuvre, économies estimées à 45 K€ sur l'année."}
+  ] // total = 36 mois
+};
+window.togglePresenter=()=>{
+  state.presenter=!state.presenter;
+  if(state.presenter){
+    state.membre=1; state.voie=1; state.cible=36;
+    state.projets=DEMO.projets.map(p=>Object.assign({},p));
+    state.form35=true; state.audite=null;
+  } else {
+    Object.assign(state,{membre:null,voie:null,cible:0,projets:[],form35:false,audite:null});
+  }
+  const dot=document.getElementById("presDot"), btn=document.getElementById("presToggle");
+  if(dot) dot.style.background = state.presenter ? "var(--green)" : "#C6D2DE";
+  if(btn){ btn.style.borderColor = state.presenter ? "var(--green)" : "var(--line)";
+    btn.style.color = state.presenter ? "var(--green-ink)" : "var(--muted)"; }
+  paint();
+};
+function fillPresenter(){
+  if(!state.presenter) return;
+  Object.keys(DEMO).forEach(k=>{
+    if(k==="projets") return;
+    const el=document.getElementById(k);
+    if(el && el.tagName!=="SELECT" && !el.value) el.value=DEMO[k];
+  });
+}
+/* ---------------- État ---------------- */
+const state = {
+  presenter:false,
+  membre:null, voie:null, cible:0,
+  projets:[], // {nom, role, debut, fin, mois, approche, desc}
+  edu:{}, form35:false, audite:null
+};
+
+/* ---------------- Définition des étapes ---------------- */
+const steps = [
+  {name:"Accueil", short:"Départ", eyebrow:"Simulateur · Candidature PMP", title:"Le parcours de candidature PMP, pas à pas",
+   sub:"Vous allez suivre chaque étape réelle du dépôt de dossier — comme si vous y étiez.", render:sAccueil, valid:()=>true},
+
+  {name:"Compte PMI", short:"Compte PMI", eyebrow:"Étape 1 sur 10", title:"Créer votre compte sur PMI.org",
+   sub:"Tout commence par un compte gratuit sur le site du PMI.", render:sCompte, valid:()=>state.membre!==null},
+
+  {name:"Éligibilité", short:"Éligibilité", eyebrow:"Étape 2 sur 10", title:"Vérifier votre éligibilité",
+   sub:"Deux voies possibles selon votre diplôme. Choisissez la vôtre.", render:sEligibilite, valid:()=>state.voie!==null},
+
+  {name:"Coordonnées", short:"Coordonnées", eyebrow:"Étape 3 sur 10", title:"Vos informations personnelles",
+   sub:"Les coordonnées doivent correspondre à votre pièce d'identité.", render:sCoord, valid:()=>true},
+
+  {name:"Diplôme", short:"Diplôme", eyebrow:"Étape 4 sur 10", title:"Votre formation (diplôme)",
+   sub:"Renseignez le diplôme qui correspond à votre voie d'éligibilité.", render:sDiplome, valid:()=>true},
+
+  {name:"Expérience", short:"Expérience", eyebrow:"Étape 5 sur 10", title:"Votre expérience projet",
+   sub:"Le cœur du dossier. Ajoutez vos projets et rédigez chaque description.", render:sExperience, valid:()=>true},
+
+  {name:"35 heures", short:"35 heures", eyebrow:"Étape 6 sur 10", title:"Vos 35 heures de formation",
+   sub:"La formation en gestion de projet exigée par le PMI.", render:sForm35, valid:()=>state.form35},
+
+  {name:"Soumission", short:"Soumission", eyebrow:"Étape 7 sur 10", title:"Révision et soumission",
+   sub:"Relisez l'ensemble, vérifiez la cohérence, puis soumettez.", render:sRevue, valid:()=>true},
+
+  {name:"Revue PMI", short:"Revue PMI", eyebrow:"Étape 8 sur 10", title:"Revue par le PMI",
+   sub:"Le PMI vérifie la complétude de votre dossier.", render:sReviewPMI, valid:()=>true},
+
+  {name:"Audit", short:"Audit", eyebrow:"Étape 9 sur 10", title:"L'audit (éventuel)",
+   sub:"Une partie des dossiers est sélectionnée aléatoirement.", render:sAudit, valid:()=>true},
+
+  {name:"Paiement", short:"Paiement", eyebrow:"Étape 10 sur 10", title:"Paiement des frais d'examen",
+   sub:"On ne paie qu'une fois le dossier approuvé.", render:sPaiement, valid:()=>true},
+
+  {name:"Planifier", short:"Planifier", eyebrow:"Dernière étape", title:"Planifier votre examen",
+   sub:"Vous disposez d'un an pour passer l'examen, avec 3 tentatives.", render:sPlanifier, valid:()=>true},
+
+  {name:"Terminé", short:"Certifié·e", eyebrow:"Parcours terminé", title:"Vous connaissez tout le parcours !",
+   sub:"Récapitulatif de votre candidature simulée.", render:sFin, valid:()=>true}
+];
+
+let i = 0;
+const $ = s => document.querySelector(s);
+
+/* ---------------- Rendu du cadre ---------------- */
+function paint(){
+  const st = steps[i];
+  $("#eyebrow").textContent = st.eyebrow;
+  $("#title").textContent = st.title;
+  $("#sub").textContent = st.sub;
+  $("#stName").textContent = st.name;
+  $("#stCount").textContent = "Étape "+(i)+" / "+(steps.length-1);
+  const pct = i/(steps.length-1)*100;
+  $("#fill").style.width = pct+"%";
+  $("#stepper").style.setProperty("--glow", (10+pct*0.8)+"%");
+
+  // dots
+  const dots = $("#dots"); dots.innerHTML="";
+  steps.forEach((s,k)=>{
+    const d=document.createElement("div");
+    d.className="dot"+(k<i?" done":"")+(k===i?" active":"");
+    d.innerHTML='<div class="b">'+(k<i?"✓":k)+'</div><div class="lbl">'+s.short+'</div>';
+    dots.appendChild(d);
+  });
+
+  const body=$("#body");
+  body.className="cardbody reveal"; body.innerHTML="";
+  st.render(body);
+  fillPresenter();
+
+  // nav
+  $("#prev").disabled = i===0;
+  const next=$("#next");
+  if(i===0){ next.textContent="Commencer la démo →"; next.className="btn next"; }
+  else if(i===steps.length-1){ next.textContent="Recommencer ⟲"; next.className="btn go"; }
+  else if(i===7){ next.textContent="Soumettre ma candidature →"; next.className="btn go"; }
+  else { next.textContent="Continuer →"; next.className="btn next"; }
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function go(dir){
+  if(dir>0){
+    if(i===steps.length-1){ reset(); return; }
+    if(!steps[i].valid()){ flashInvalid(); return; }
+  }
+  i=Math.max(0,Math.min(steps.length-1,i+dir));
+  paint();
+}
+function flashInvalid(){
+  const n=$("#next"); n.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},
+    {transform:"translateX(6px)"},{transform:"translateX(0)"}],{duration:280});
+  const hint=$("#validhint"); if(hint){hint.style.color="var(--coral)";hint.style.fontWeight="600";}
+}
+function reset(){
+  if(state.presenter){ togglePresenter(); togglePresenter(); i=0; paint(); return; }
+  Object.assign(state,{membre:null,voie:null,cible:0,projets:[],edu:{},form35:false,audite:null}); i=0; paint();
+}
+
+$("#prev").onclick=()=>go(-1);
+$("#next").onclick=()=>go(1);
+
+/* ================= ÉTAPES ================= */
+
+function tip(txt){ return '<div class="tip"><div class="ic">i</div><div class="t">'+txt+'</div></div>'; }
+
+function sAccueil(b){
+  b.innerHTML =
+    tip("<b>À savoir :</b> le PMP n'est pas un examen où l'on s'inscrit puis on passe directement. Il faut d'abord <b>candidater</b> auprès du PMI et être <b>approuvé</b> (avec un risque d'audit) avant de réserver l'examen. Ce simulateur vous fait vivre chaque étape.")
+    + '<div class="panel" style="margin-bottom:6px"><b style="font-size:14px">Ce que vous allez parcourir</b>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin-top:12px;font-size:13px">'
+    + ['Créer un compte PMI.org','Vérifier l\'éligibilité','Saisir vos coordonnées','Renseigner votre diplôme',
+       'Décrire votre expérience projet','Déclarer vos 35 heures','Soumettre le dossier','Passer la revue du PMI',
+       'Gérer un éventuel audit','Payer puis planifier l\'examen'].map((t,k)=>
+       '<div style="display:flex;gap:9px;align-items:center"><span style="font-family:\'IBM Plex Mono\',monospace;color:var(--blue);font-weight:600;font-size:12px">'+(k+1).toString().padStart(2,"0")+'</span>'+t+'</div>').join("")
+    + '</div></div>'
+    + '<p class="note">Astuce formatrice : projetez ce simulateur en partage d\'écran et cliquez étape par étape. Les apprenants peuvent aussi l\'ouvrir eux-mêmes pour s\'entraîner.</p>';
+}
+
+function sCompte(b){
+  b.innerHTML =
+    tip("<b>Conseil :</b> créez votre compte tôt. Décidez aussi si vous prenez l'<b>adhésion PMI (PMI membership)</b> : elle réduit fortement le coût de l'examen et donne accès au PMBOK. Elle est souvent rentable dès la première candidature.")
+    + '<div class="grid">'
+    + f("Adresse e-mail","email","email","prenom.nom@exemple.com")
+    + f("Nom","text","nom","Ben Salah")
+    + f("Prénom","text","prenom","Amel")
+    + '<div class="field"><label>Mot de passe</label><input type="text" value="•••••••• (simulation)" disabled style="color:var(--muted)"></div>'
+    + '</div>'
+    + '<div style="margin-top:18px"><label style="display:block;margin-bottom:10px">Souhaitez-vous adhérer au PMI ? <span class="req">*</span></label>'
+    + '<div class="choices">'
+    + '<div class="choice" data-mem="1" onclick="pickMem(1)"><span class="badge">✓ choisi</span><h4>Oui, adhérent PMI</h4><p>Coût d\'examen réduit + accès PMBOK et ressources. Adhésion ~164 $/an (à vérifier sur pmi.org).</p></div>'
+    + '<div class="choice" data-mem="0" onclick="pickMem(0)"><span class="badge">✓ choisi</span><h4>Non, sans adhésion</h4><p>Aucun frais d\'adhésion, mais l\'examen coûte plus cher. Possible à tout moment.</p></div>'
+    + '</div></div>'
+    + '<p class="note warn" id="validhint">Sélectionnez une option pour continuer.</p>'
+    + '<p class="note">Simulation : aucun compte n\'est créé, aucune donnée n\'est envoyée.</p>';
+  syncMem();
+}
+window.pickMem=v=>{ state.membre=v; syncMem(); const h=$("#validhint"); if(h){h.textContent="Choix enregistré ✓";h.style.color="var(--green-ink)";} };
+function syncMem(){ document.querySelectorAll("[data-mem]").forEach(el=>
+  el.classList.toggle("sel", state.membre!==null && +el.dataset.mem===state.membre)); }
+
+function sEligibilite(b){
+  b.innerHTML =
+    tip("<b>L'éligibilité passe avant tout.</b> Vos <b>35 heures</b> sont déjà acquises grâce à votre formation SAMethod. Il reste à confirmer diplôme + expérience. Ces conditions n'ont pas changé avec l'examen de 2026.")
+    + '<div class="choices">'
+    + '<div class="choice" data-voie="1" onclick="pickVoie(1,36)"><span class="badge">✓ ma voie</span><h4>Voie 1 — Diplôme Bac+4</h4><p>Bachelor / bac+4 ou équivalent<br><b>36 mois</b> d\'expérience à diriger des projets<br>35 heures de formation</p></div>'
+    + '<div class="choice green" data-voie="2" onclick="pickVoie(2,60)"><span class="badge">✓ ma voie</span><h4>Voie 2 — Diplôme secondaire</h4><p>Bac / diplôme secondaire ou équivalent<br><b>60 mois</b> d\'expérience à diriger des projets<br>35 heures de formation</p></div>'
+    + '</div>'
+    + '<div class="note" id="voieInfo" style="margin-top:14px"></div>'
+    + '<p class="note warn" id="validhint" style="margin-top:6px">Choisissez votre voie pour continuer.</p>';
+  syncVoie();
+}
+window.pickVoie=(v,c)=>{ state.voie=v; state.cible=c; syncVoie();
+  const h=$("#validhint"); if(h){h.textContent="Voie "+v+" sélectionnée ✓";h.style.color="var(--green-ink)";} };
+function syncVoie(){
+  document.querySelectorAll("[data-voie]").forEach(el=>
+    el.classList.toggle("sel", state.voie!==null && +el.dataset.voie===state.voie));
+  const inf=$("#voieInfo");
+  if(inf&&state.voie) inf.innerHTML="Objectif d'expérience à atteindre : <b>"+state.cible+" mois</b> non chevauchants. Le compteur de l'étape Expérience vous aidera à suivre ce total.";
+}
+
+function sCoord(b){
+  b.innerHTML =
+    tip("<b>Cohérence :</b> saisissez des coordonnées identiques à votre pièce d'identité. Une incohérence peut compliquer un éventuel audit.")
+    + '<div class="grid">'
+    + f("Pays","text","pays","Tunisie") + f("Ville","text","ville","Tunis")
+    + f("Adresse","text","adr","12 avenue Habib Bourguiba") + f("Téléphone","tel","tel","+216 ...")
+    + '</div><p class="note">Ces champs sont fictifs et servent uniquement à la démonstration.</p>';
+}
+
+function sDiplome(b){
+  const seuil = state.voie===2 ? "diplôme secondaire (bac)" : "diplôme bac+4 / bachelor";
+  b.innerHTML =
+    tip("<b>Gardez une copie numérique</b> de votre diplôme : elle sera demandée en cas d'audit. Il doit correspondre à votre voie ("+seuil+").")
+    + '<div class="grid">'
+    + f("Intitulé du diplôme","text","dip","Master en génie logiciel")
+    + f("Établissement","text","etab","Université de Tunis")
+    + f("Pays","text","paysdip","Tunisie")
+    + f("Année d'obtention","text","annee","2016")
+    + '</div>'
+    + '<div class="field full" style="margin-top:14px"><label>Niveau déclaré</label><select id="niv">'
+    + '<option'+(state.voie===1?" selected":"")+'>Diplôme universitaire (bac+4 / bachelor)</option>'
+    + '<option'+(state.voie===2?" selected":"")+'>Diplôme secondaire (bac)</option>'
+    + '</select></div>';
+}
+
+/* ---- Étape Expérience : compteur + détecteur de qualité ---- */
+function sExperience(b){
+  b.innerHTML =
+    tip("<b>Le cœur du dossier.</b> Décrivez chaque projet selon <b>Quoi&nbsp;–&nbsp;Comment&nbsp;–&nbsp;Résultat</b>, avec des verbes d'action en «&nbsp;je&nbsp;», des chiffres et un résultat mesurable. L'expérience doit être <b>non chevauchante</b>.")
+    + '<div class="panel" id="cptPanel"></div>'
+    + '<div style="margin-top:16px"><b style="font-size:14px">Ajouter un projet</b></div>'
+    + '<div class="grid" style="margin-top:10px">'
+    + f("Nom du projet","text","pnom","Refonte du site e-commerce")
+    + f("Votre rôle","text","prole","Chef de projet")
+    + f("Début (MM/AAAA)","text","pdeb","01/2023")
+    + f("Fin (MM/AAAA)","text","pfin","10/2023")
+    + '<div class="field"><label>Durée (mois)</label><input type="number" id="pmois" min="1" max="120" placeholder="10"></div>'
+    + '<div class="field"><label>Approche</label><select id="papp"><option>Prédictif</option><option>Agile</option><option>Hybride</option></select></div>'
+    + '</div>'
+    + '<div class="field full" style="margin-top:12px"><label>Description du projet <span class="req">*</span> <span style="font-weight:400;color:var(--muted)">— testez la qualité en direct</span></label>'
+    + '<textarea id="pdesc" placeholder="En tant que ..., j\'ai planifié et piloté ... (Quoi). J\'ai utilisé ... (Comment). Résultat : ... (mesurable)."></textarea></div>'
+    + '<div class="panel" id="qualite" style="margin-top:10px"></div>'
+    + '<button class="btn ghost" style="margin-top:12px" onclick="addProj()">＋ Ajouter ce projet au dossier</button>'
+    + '<div style="margin-top:14px"><button class="btn ghost" style="background:var(--lightgold);color:#8a6410" onclick="loadExemple()">Voir un exemple de description forte</button></div>';
+  renderCounter(); wireQuality();
+}
+function renderCounter(){
+  const p=$("#cptPanel"); if(!p) return;
+  const tot=state.projets.reduce((a,x)=>a+(+x.mois||0),0);
+  const cible=state.cible||36;
+  const pct=Math.min(100, tot/cible*100);
+  const ok=tot>=cible;
+  p.innerHTML =
+    '<div class="counter"><div><b style="font-size:13px">Total d\'expérience</b><div class="note" style="margin:0">Objectif voie '+(state.voie||1)+' : '+cible+' mois non chevauchants</div></div>'
+    + '<div class="num"><b class="'+(ok?"ok":"")+'">'+tot+'</b> / '+cible+' mois</div></div>'
+    + '<div class="bar"><i class="'+(ok?"ok":"")+'" style="width:'+pct+'%"></i></div>'
+    + (state.projets.length? '<div class="plist">'+state.projets.map((x,k)=>
+        '<div class="pitem"><span class="nm">'+esc(x.nom)+'</span><span class="ap">'+x.approche+'</span><span class="mo">'+x.mois+' m</span><button onclick="delProj('+k+')" title="Retirer">✕</button></div>').join("")+'</div>' : '')
+    + (ok? '<div class="note" style="color:var(--green-ink);font-weight:600;margin-top:10px">✓ Objectif atteint — pensez à retirer les mois qui se chevauchent entre projets.</div>'
+         : '<div class="note" style="margin-top:10px">Ajoutez des projets jusqu\'à atteindre '+cible+' mois. Rappel : deux projets simultanés ne comptent pas double.</div>');
+}
+const VERBS=/\b(j'ai|je |planifi|coordonn|pilot|g[ée]r|anim|d[ée]fini|suivi|dirig|organis|conduit|encadr|d[ée]ploy|livr|n[ée]goci|structur|mis en place|mobilis)/i;
+const METHODS=/\b(agile|hybride|pr[ée]dictif|scrum|sprint|backlog|wbs|p[ée]rim[èe]tre|planning|budget|risqu|parties prenantes|jalon|kanban|charte|rétrospective|qualit[ée]|change control)/i;
+const RESULT=/\b(r[ée]sultat|livr[ée]|d[ée]lai|budget|%|pourcent|atteint|r[ée]duit|augment|[ée]conom|satisfaction|dans les temps|avance|objectif)/i;
+const NUMS=/\d/;
+function analyse(t){
+  const s={verbe:VERBS.test(t),methode:METHODS.test(t),chiffre:NUMS.test(t),resultat:RESULT.test(t)};
+  s.score=(s.verbe?1:0)+(s.methode?1:0)+(s.chiffre?1:0)+(s.resultat?1:0);
+  s.assez=t.trim().length>=60;
+  return s;
+}
+function wireQuality(){
+  const ta=$("#pdesc"); if(!ta) return;
+  const upd=()=>{
+    const t=ta.value, a=analyse(t);
+    const labels=["Trop vague","À renforcer","Correcte","Bonne","Forte"];
+    const sc = t.trim().length<20?0:a.score;
+    const q=$("#qualite");
+    q.innerHTML =
+      '<div class="mlabel">Qualité de la description : <span style="color:'+
+        (sc>=4?"var(--green-ink)":sc>=3?"#7a9e2a":sc>=1?"var(--gold)":"var(--coral)")+'">'+labels[sc]+'</span></div>'
+      + '<div class="meter">'+[1,2,3,4].map(n=>'<i class="'+(sc>=n?("on"+Math.min(sc,4)):"")+'"></i>').join("")+'</div>'
+      + line(a.verbe,"Verbes d'action en « je » (planifié, coordonné, géré…)")
+      + line(a.methode,"Méthodes / approche / domaines (agile, WBS, budget, risques…)")
+      + line(a.chiffre,"Chiffres (budget, durée, taille d'équipe, %)")
+      + line(a.resultat,"Résultat mesurable (livré, délai, %, objectif atteint)");
+  };
+  ta.addEventListener("input",upd); upd();
+}
+function line(hit,txt){ return '<div class="checkline '+(hit?"hit":"")+'"><span class="m">'+(hit?"✓":"·")+'</span>'+txt+'</div>'; }
+window.addProj=()=>{
+  const g=id=>$("#"+id)?$("#"+id).value.trim():"";
+  const nom=g("pnom")||"Projet sans nom", mois=+g("pmois")||0, desc=g("pdesc");
+  if(mois<=0){ alert("Indiquez une durée en mois (supérieure à 0)."); return; }
+  if(analyse(desc).score<2){ if(!confirm("Cette description semble faible (peu de verbes d'action, de chiffres ou de résultat). L'ajouter quand même ?")) return; }
+  state.projets.push({nom, role:g("prole"), debut:g("pdeb"), fin:g("pfin"), mois, approche:$("#papp").value, desc});
+  sExperience($("#body")); // re-render
+};
+window.delProj=k=>{ state.projets.splice(k,1); sExperience($("#body")); };
+window.loadExemple=()=>{
+  $("#pnom").value="Refonte du site e-commerce";
+  $("#prole").value="Chef de projet";
+  $("#pdeb").value="01/2023"; $("#pfin").value="10/2023"; $("#pmois").value="10";
+  $("#papp").value="Hybride";
+  $("#pdesc").value="En tant que chef de projet, j'ai planifié et piloté le développement d'un site e-commerce (approche hybride). J'ai défini le périmètre et le WBS, géré un budget de 80 K€ et un planning de 6 mois, coordonné une équipe de 5 personnes et animé les parties prenantes. J'ai suivi les risques et le change control. Résultat : site livré avec 1 semaine d'avance, dans le budget, +30% de conversion au lancement.";
+  wireQuality();
+  $("#qualite").scrollIntoView({behavior:"smooth",block:"center"});
+};
+
+window.setForm35=v=>{ state.form35=v; const h=document.getElementById("validhint35"); if(h) h.style.display=v?"none":"block"; };
+function sForm35(b){
+  b.innerHTML =
+    tip("<b>Vos 35 heures sont validées</b> par votre formation SAMethod. Conservez précieusement votre <b>attestation (certificat de formation)</b> : c'est un justificatif clé en cas d'audit.")
+    + '<div class="grid">'
+    + '<div class="field"><label>Organisme de formation</label><input type="text" value="SAMethod" readonly></div>'
+    + '<div class="field"><label>Heures de formation (contact hours)</label><input type="text" value="35 heures" readonly></div>'
+    + f("Intitulé","text","fintitule","Préparation à la certification PMP")
+    + f("Référence de l'attestation","text","fref","SAM-PMP-2026-...")
+    + '</div>'
+    + '<label class="checkline hit" style="margin-top:16px;cursor:pointer;font-size:13.5px"><input type="checkbox" id="cb35" style="width:auto" '+(state.form35?"checked":"")+' onchange="setForm35(this.checked)"> Je confirme détenir mon attestation SAMethod de 35 heures.</label>'
+    + '<p class="note warn" id="validhint35" style="display:'+(state.form35?"none":"block")+'">Cochez la confirmation pour continuer.</p>';
+}
+
+function sRevue(b){
+  const tot=state.projets.reduce((a,x)=>a+(+x.mois||0),0);
+  const okMois=tot>=state.cible;
+  b.innerHTML =
+    tip("<b>Avant de soumettre :</b> relisez tout votre dossier d'un bloc. Raconte-t-il une histoire <b>cohérente</b> (rôles → responsabilités → livrables → résultats) ? Les dates se tiennent-elles ?")
+    + '<div class="recap">'
+    + row("Voie d'éligibilité", state.voie? ("Voie "+state.voie+(state.voie===1?" (bac+4, 36 mois)":" (secondaire, 60 mois)")):"—")
+    + row("Statut PMI", state.membre===1?"Adhérent":state.membre===0?"Non-adhérent":"—")
+    + row("Expérience déclarée", tot+" / "+state.cible+" mois", okMois?"ok":"no")
+    + row("Nombre de projets", state.projets.length+" projet(s)")
+    + row("35 heures de formation", state.form35?"Confirmées (SAMethod)":"Non confirmées", state.form35?"ok":"no")
+    + '</div>'
+    + (okMois? '' : '<p class="note warn" style="margin-top:12px">Votre total d\'expérience n\'atteint pas encore l\'objectif de '+state.cible+' mois. Dans la réalité, le PMI pourrait refuser le dossier. Vous pouvez revenir à l\'étape Expérience.</p>')
+    + '<p class="note" style="margin-top:12px">En cliquant sur « Soumettre ma candidature », votre dossier partirait en revue chez le PMI. <b>Aucun paiement à ce stade.</b></p>';
+}
+
+function sReviewPMI(b){
+  b.innerHTML =
+    '<div class="status"><div class="ring" style="background:var(--blue)"><div class="spin"></div></div>'
+    + '<h3>Dossier en cours de revue…</h3><p>Le PMI vérifie la <b>complétude</b> de votre candidature. Le délai est généralement d\'environ <b>5 jours ouvrés</b>.</p></div>'
+    + '<div id="reviewDone" style="display:none">'
+    + tip("<b>Bon à savoir :</b> à ce stade, le PMI vérifie que le dossier est complet — il ne juge pas encore le fond projet par projet. Le paiement n'intervient qu'après l'approbation.")
+    + '</div>';
+  setTimeout(()=>{
+    const r=$("#body"); if(!r||steps[i].name!=="Revue PMI") return;
+    r.querySelector(".status").innerHTML =
+      '<div class="ring" style="background:var(--green)">✓</div><h3>Complétude confirmée</h3>'
+      + '<p>Votre dossier est complet et part à l\'étape suivante. Dans la réalité, vous recevez un e-mail de confirmation du PMI.</p>';
+    const d=$("#reviewDone"); if(d) d.style.display="block";
+  },2600);
+}
+
+function sAudit(b){
+  b.innerHTML =
+    tip("<b>L'audit est une sélection ALÉATOIRE</b>, pas une accusation. Un dossier honnête et documenté le passe sans difficulté. Préparez vos justificatifs <b>à l'avance</b> et prévenez vos signataires.")
+    + '<div id="auditBox" class="status">'
+    + '<div class="ring" style="background:var(--gold)">?</div><h3>Suis-je audité ?</h3>'
+    + '<p>Le PMI tire au sort une partie des dossiers. Lancez la simulation pour découvrir votre cas.</p>'
+    + '<button class="btn next" style="margin-top:16px" onclick="rollAudit()">Simuler la sélection d\'audit</button></div>';
+}
+window.rollAudit=()=>{
+  const audited = state.audite!==null ? state.audite : (Math.random()<0.5);
+  state.audite=audited;
+  const box=$("#auditBox");
+  if(audited){
+    box.innerHTML =
+      '<div class="ring" style="background:var(--coral)">!</div><h3>Vous êtes audité·e</h3>'
+      + '<p>Rien d\'inquiétant : vous avez généralement <b>90 jours</b> pour fournir les justificatifs. Votre dossier est simplement mis en pause.</p>'
+      + '<ul class="doclist">'
+      + '<li><span class="d">1</span><div><b>Copie du diplôme</b> correspondant à votre voie d\'éligibilité.</div></li>'
+      + '<li><span class="d">2</span><div><b>Vérification d\'expérience</b> : signatures de vos managers / clients confirmant les projets déclarés.</div></li>'
+      + '<li><span class="d">3</span><div><b>Certificat des 35 heures</b> (votre attestation SAMethod).</div></li>'
+      + '</ul>'
+      + '<button class="btn go" style="margin-top:16px" onclick="clearAudit()">J\'ai fourni mes justificatifs → continuer</button>';
+  } else {
+    box.innerHTML =
+      '<div class="ring" style="background:var(--green)">✓</div><h3>Pas d\'audit cette fois</h3>'
+      + '<p>Votre dossier n\'a pas été sélectionné. Vous passez directement à l\'approbation puis au paiement. Gardez tout de même vos justificatifs prêts.</p>';
+  }
+};
+window.clearAudit=()=>{
+  $("#auditBox").innerHTML =
+    '<div class="ring" style="background:var(--green)">✓</div><h3>Audit validé</h3>'
+    + '<p>Vos justificatifs sont conformes à votre dossier. La candidature est <b>approuvée</b>. Vous pouvez passer au paiement.</p>';
+};
+
+function sPaiement(b){
+  const membre = state.membre===1;
+  const montant = membre ? "425 $" : "675 $";
+  b.innerHTML =
+    tip("<b>On ne paie qu'après l'approbation du dossier.</b> Deux moyens de régler : votre <b>carte bancaire</b>, ou un <b>bon d'examen (voucher)</b> — un code prépayé. Les frais varient selon votre statut et votre pays : vérifiez toujours le montant exact sur pmi.org.")
+    + '<div class="fee"><div><div class="lbl">Frais d\'examen '+(membre?"— tarif adhérent PMI":"— tarif non-adhérent")+'</div><div class="amt" id="feeAmt">'+montant+'</div></div>'
+    + '<div style="text-align:right;font-size:12px;color:#B9D2E6">'+(membre?"Votre adhésion vous fait<br>économiser sur ce tarif":"Adhérer au PMI réduirait<br>ce montant")+'</div></div>'
+    // Onglets moyen de paiement
+    + '<div style="display:flex;gap:8px;margin:4px 0 14px">'
+    + '<button class="btn" id="tabCard" onclick="payTab(\'card\')" style="flex:1;background:var(--blue);color:#fff;font-size:13px;padding:10px">💳 Payer par carte</button>'
+    + '<button class="btn" id="tabVou" onclick="payTab(\'vou\')" style="flex:1;background:#fff;border-color:var(--line);color:var(--muted);font-size:13px;padding:10px">🎟️ Utiliser un bon (voucher)</button>'
+    + '</div>'
+    // --- Panneau carte ---
+    + '<div id="panCard">'
+    + '<div class="grid">'
+    + '<div class="field"><label>Numéro de carte</label><input type="text" value="•••• •••• •••• •••• (simulation)" disabled style="color:var(--muted)"></div>'
+    + '<div class="field"><label>Titulaire</label><input type="text" placeholder="Comme sur la carte"></div>'
+    + '</div>'
+    + '<p class="note warn">Ne saisissez jamais de vrai numéro de carte ici : ceci est une simulation. Le paiement réel se fait uniquement sur pmi.org.</p>'
+    + '<button class="btn go" style="margin-top:4px" onclick="payer(\''+montant+'\')">Payer '+montant+' (simulation)</button>'
+    + '</div>'
+    // --- Panneau voucher ---
+    + '<div id="panVou" style="display:none">'
+    + '<div class="panel" style="background:var(--lightgold);border-color:#F0D89A">'
+    + '<b style="font-size:13.5px">Qu\'est-ce qu\'un bon d\'examen (voucher) ?</b>'
+    + '<p class="note" style="margin-top:6px;color:var(--ink)">Un <b>code prépayé</b> qui couvre tout ou partie des frais d\'examen. Il est souvent fourni par un <b>employeur</b> ou un <b>partenaire de formation agréé (ATP)</b>, ou acheté auprès d\'un revendeur agréé. On le saisit au moment du paiement ; le total se met à jour.</p>'
+    + '</div>'
+    + '<div class="field full" style="margin-top:14px"><label>Code du bon (voucher / promo code)</label>'
+    + '<div style="display:flex;gap:8px"><input type="text" id="vouCode" placeholder="Ex. : SAM-XXXX-XXXX"><button class="btn ghost" onclick="applyVoucher()">Appliquer</button></div></div>'
+    + '<div id="vouMsg"></div>'
+    + '<ul class="doclist" style="margin-top:14px;max-width:none">'
+    + '<li><span class="d">!</span><div>Une <b>adhésion PMI active</b> est généralement requise pour utiliser un bon PMP.</div></li>'
+    + '<li><span class="d">⏱</span><div>Un bon a une <b>durée de validité</b> (souvent environ 6 mois à compter de son émission).</div></li>'
+    + '<li><span class="d">✕</span><div>Il est en général <b>non remboursable</b> une fois la demande initiée.</div></li>'
+    + '<li><span class="d">✓</span><div><b>Vérifiez toujours le montant final</b> après application du bon, avant de valider.</div></li>'
+    + '</ul>'
+    + '<button class="btn go" id="vouPay" style="margin-top:14px;display:none" onclick="payer(\'0 $ (bon appliqué)\')">Valider avec le bon (simulation)</button>'
+    + '</div>'
+    + '<div id="payOk"></div>';
+}
+window.payTab=t=>{
+  const card=$("#panCard"), vou=$("#panVou"), tc=$("#tabCard"), tv=$("#tabVou");
+  const on=t==="card";
+  card.style.display=on?"block":"none"; vou.style.display=on?"none":"block";
+  tc.style.background=on?"var(--blue)":"#fff"; tc.style.color=on?"#fff":"var(--muted)"; tc.style.borderColor=on?"transparent":"var(--line)";
+  tv.style.background=on?"#fff":"var(--blue)"; tv.style.color=on?"var(--muted)":"#fff"; tv.style.borderColor=on?"var(--line)":"transparent";
+};
+window.applyVoucher=()=>{
+  const code=($("#vouCode").value||"").trim();
+  const msg=$("#vouMsg"), pay=$("#vouPay");
+  if(!code){ msg.innerHTML='<p class="note warn">Saisissez d\'abord un code de bon.</p>'; pay.style.display="none"; return; }
+  msg.innerHTML='<div class="panel" style="margin-top:12px;background:var(--lightgreen);border-color:#BFE3BC"><b style="color:var(--green-ink)">✓ Bon appliqué (simulation)</b><div class="note" style="margin-top:5px;color:var(--ink)">Nouveau total : <b>0 $</b>. Dans la réalité, le total se met à jour selon la valeur du bon — vérifiez-le avant de confirmer.</div></div>';
+  $("#feeAmt").textContent="0 $"; pay.style.display="inline-block";
+};
+window.payer=(via)=>{ $("#payOk").innerHTML='<div class="status" style="margin-top:16px"><div class="ring" style="background:var(--green)">✓</div><h3>Paiement simulé accepté</h3><p>Règlement enregistré ('+(via||"")+'). Votre période d\'éligibilité d\'un an démarre : vous pouvez maintenant planifier l\'examen.</p></div>'; };
+
+function sPlanifier(b){
+  b.innerHTML =
+    tip("<b>Vous avez un an</b> pour passer l'examen, avec jusqu'à <b>3 tentatives</b>. Réservez tôt pour obtenir la date et le créneau souhaités.")
+    + '<div class="choices">'
+    + '<div class="choice sel" onclick="this.parentNode.querySelectorAll(\'.choice\').forEach(c=>c.classList.remove(\'sel\'));this.classList.add(\'sel\')"><span class="badge">✓ choisi</span><h4>Centre d\'examen</h4><p>Passage sur place dans un centre agréé Pearson VUE.</p></div>'
+    + '<div class="choice" onclick="this.parentNode.querySelectorAll(\'.choice\').forEach(c=>c.classList.remove(\'sel\'));this.classList.add(\'sel\')"><span class="badge">✓ choisi</span><h4>En ligne surveillé</h4><p>Depuis chez vous, sous surveillance à distance (proctoring).</p></div>'
+    + '</div>'
+    + '<div class="grid" style="margin-top:14px">'
+    + f("Date souhaitée","text","exdate","JJ/MM/AAAA")
+    + f("Créneau","text","exslot","Matin")
+    + '</div>'
+    + '<p class="note">Rappel : réalisez l\'examen blanc SAMethod (4h, conditions réelles) avant la Séance 20.</p>';
+}
+
+function sFin(b){
+  const tot=state.projets.reduce((a,x)=>a+(+x.mois||0),0);
+  b.innerHTML =
+    '<div class="status"><div class="ring" style="background:linear-gradient(135deg,var(--gold),var(--green))">★</div>'
+    + '<h3>Parcours de candidature terminé</h3>'
+    + '<p>Vous venez de suivre l\'intégralité du dépôt de dossier PMP, de la création du compte jusqu\'à la planification de l\'examen.</p></div>'
+    + '<div class="recap" style="margin-top:16px">'
+    + row("Voie", state.voie?("Voie "+state.voie):"—")
+    + row("Expérience", tot+" mois déclarés")
+    + row("Projets décrits", state.projets.length+"")
+    + row("35 heures", state.form35?"Confirmées (SAMethod)":"—")
+    + row("Audit", state.audite===true?"Passé avec justificatifs":state.audite===false?"Non sélectionné":"—")
+    + '</div>'
+    + tip("<b>Et maintenant, pour de vrai :</b> constituez votre dossier sur <b>pmi.org</b> avec la même méthode. Gardez diplôme, attestation SAMethod et signataires prêts. Et réalisez l'examen blanc avant la Séance 20.")
+    + '<p class="note" style="text-align:center">Cliquez sur « Recommencer » pour rejouer la démo avec d\'autres choix.</p>';
+}
+
+/* ---------------- Helpers ---------------- */
+function f(label,type,id,ph){ return '<div class="field"><label>'+label+'</label><input type="'+type+'" id="'+id+'" placeholder="'+ph+'"></div>'; }
+function row(k,v,cls){ return '<div class="row"><span class="k">'+k+'</span><span class="v'+(cls?" "+cls:"")+'">'+v+'</span></div>'; }
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="TEXTAREA"||e.target.tagName==="INPUT"||e.target.tagName==="SELECT") return;
+  if(e.key==="ArrowRight") go(1);
+  if(e.key==="ArrowLeft") go(-1);
+});
+
+paint();
+</script>
+</body>
+</html>
