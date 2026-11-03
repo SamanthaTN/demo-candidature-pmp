@@ -237,9 +237,9 @@ button.btn{font-family:inherit;font-weight:600;font-size:14px;border-radius:10px
 "use strict";
 /* ---------------- Candidat fil-rouge (mode présentateur) ---------------- */
 const DEMO = {
-  email:"candidat.demo@exemple.com", nom:"Trabelsi", prenom:"Sami",
-  pays:"Tunisie", ville:"Tunis", adr:"Avenue de la Liberté", tel:"+216 20 000 000",
-  dip:"Master en management", etab:"Université de Tunis", paysdip:"Tunisie", annee:"2015",
+  email:"candidat.demo@exemple.com", nom:"Démo", prenom:"Candidat",
+  pays:"Pays de résidence", ville:"Ville", adr:"Adresse fictive", tel:"+00 00 000 000",
+  dip:"Master en management", etab:"Université (exemple)", paysdip:"Pays du diplôme", annee:"2015",
   fintitule:"Préparation à la certification PMP", fref:"SAM-PMP-2026-014",
   projets:[
     {nom:"Déploiement d'un nouvel outil interne", role:"Chef de projet", debut:"01/2021", fin:"12/2021", mois:12, approche:"Prédictif",
@@ -292,7 +292,7 @@ const steps = [
    sub:"Tout commence par un compte gratuit sur le site du PMI.", render:sCompte, valid:()=>state.membre!==null},
 
   {name:"Éligibilité", short:"Éligibilité", eyebrow:"Étape 2 sur 10", title:"Vérifier votre éligibilité",
-   sub:"Deux voies possibles selon votre diplôme. Choisissez la vôtre.", render:sEligibilite, valid:()=>state.voie!==null},
+   sub:"Quatre voies possibles selon votre niveau d'études. Choisissez la vôtre.", render:sEligibilite, valid:()=>state.voie!==null},
 
   {name:"Coordonnées", short:"Coordonnées", eyebrow:"Étape 3 sur 10", title:"Vos informations personnelles",
    sub:"Les coordonnées doivent correspondre à votre pièce d'identité.", render:sCoord, valid:()=>true},
@@ -321,7 +321,7 @@ const steps = [
   {name:"Planifier", short:"Planifier", eyebrow:"Dernière étape", title:"Planifier votre examen",
    sub:"Vous disposez d'un an pour passer l'examen, avec 3 tentatives.", render:sPlanifier, valid:()=>true},
 
-  {name:"Terminé", short:"Certifié·e", eyebrow:"Parcours terminé", title:"Vous connaissez tout le parcours !",
+  {name:"Terminé", short:"Fin", eyebrow:"Parcours terminé", title:"Vous connaissez tout le parcours !",
    sub:"Récapitulatif de votre candidature simulée.", render:sFin, valid:()=>true}
 ];
 
@@ -407,13 +407,13 @@ function sCompte(b){
     tip("<b>Conseil :</b> créez votre compte tôt. Décidez aussi si vous prenez l'<b>adhésion PMI (PMI membership)</b> : elle réduit fortement le coût de l'examen et donne accès au PMBOK. Elle est souvent rentable dès la première candidature.")
     + '<div class="grid">'
     + f("Adresse e-mail","email","email","prenom.nom@exemple.com")
-    + f("Nom","text","nom","Ben Salah")
-    + f("Prénom","text","prenom","Amel")
+    + f("Nom","text","nom","Nom")
+    + f("Prénom","text","prenom","Prénom")
     + '<div class="field"><label>Mot de passe</label><input type="text" value="•••••••• (simulation)" disabled style="color:var(--muted)"></div>'
     + '</div>'
     + '<div style="margin-top:18px"><label style="display:block;margin-bottom:10px">Souhaitez-vous adhérer au PMI ? <span class="req">*</span></label>'
     + '<div class="choices">'
-    + '<div class="choice" data-mem="1" onclick="pickMem(1)"><span class="badge">✓ choisi</span><h4>Oui, adhérent PMI</h4><p>Coût d\'examen réduit + accès PMBOK et ressources. Adhésion ~164 $/an (à vérifier sur pmi.org).</p></div>'
+    + '<div class="choice" data-mem="1" onclick="pickMem(1)"><span class="badge">✓ choisi</span><h4>Oui, adhérent PMI</h4><p>Coût d\'examen réduit + accès PMBOK et ressources. Montant de l\'adhésion : voir pmi.org. Le tarif membre ne s\'applique que si l\'adhésion est active AVANT le paiement de l\'examen.</p></div>'
     + '<div class="choice" data-mem="0" onclick="pickMem(0)"><span class="badge">✓ choisi</span><h4>Non, sans adhésion</h4><p>Aucun frais d\'adhésion, mais l\'examen coûte plus cher. Possible à tout moment.</p></div>'
     + '</div></div>'
     + '<p class="note warn" id="validhint">Sélectionnez une option pour continuer.</p>'
@@ -450,10 +450,10 @@ function syncVoie(){
 
 function sCoord(b){
   b.innerHTML =
-    tip("<b>Cohérence :</b> saisissez des coordonnées identiques à votre pièce d'identité. Une incohérence peut compliquer un éventuel audit.")
+    tip("<b>Cohérence :</b> votre nom doit correspondre <b>exactement</b> à celui de votre pièce d'identité (exigé le jour de l'examen). Une incohérence peut aussi compliquer un éventuel audit. <b>Rédigez votre candidature en anglais.</b>")
     + '<div class="grid">'
-    + f("Pays","text","pays","Tunisie") + f("Ville","text","ville","Tunis")
-    + f("Adresse","text","adr","12 avenue Habib Bourguiba") + f("Téléphone","tel","tel","+216 ...")
+    + f("Pays","text","pays","Pays de résidence") + f("Ville","text","ville","Ville")
+    + f("Adresse","text","adr","Adresse") + f("Téléphone","tel","tel","+00 ...")
     + '</div><p class="note">Ces champs sont fictifs et servent uniquement à la démonstration.</p>';
 }
 
@@ -463,8 +463,8 @@ function sDiplome(b){
     tip("<b>Gardez une copie numérique</b> de votre diplôme : elle sera demandée en cas d'audit. Il doit correspondre à votre voie ("+seuil+").")
     + '<div class="grid">'
     + f("Intitulé du diplôme","text","dip","Master en génie logiciel")
-    + f("Établissement","text","etab","Université de Tunis")
-    + f("Pays","text","paysdip","Tunisie")
+    + f("Établissement","text","etab","Établissement")
+    + f("Pays","text","paysdip","Pays du diplôme")
     + f("Année d'obtention","text","annee","2016")
     + '</div>'
     + '<div class="field full" style="margin-top:14px"><label>Niveau déclaré</label><select id="niv">'
@@ -478,7 +478,7 @@ function sDiplome(b){
 /* ---- Étape Expérience : compteur + détecteur de qualité ---- */
 function sExperience(b){
   b.innerHTML =
-    tip("<b>Le cœur du dossier.</b> Décrivez chaque projet selon <b>Quoi&nbsp;–&nbsp;Comment&nbsp;–&nbsp;Résultat</b>, avec des verbes d'action en «&nbsp;je&nbsp;», des chiffres et un résultat mesurable. L'expérience doit être <b>non cumulée</b> (deux projets simultanés ne comptent qu'une fois) et acquise au cours des <b>10 dernières années</b>.")
+    tip("<b>Le cœur du dossier.</b> Pour chaque projet, le PMI attend une description couvrant <b>l'objectif, votre rôle, vos responsabilités et livrables, et le résultat</b> (réponse type de <b>200 à 500 mots</b>, en anglais), avec des verbes d'action à la première personne et des chiffres. Les tâches routinières, opérationnelles ou administratives ne comptent pas. L'expérience doit être <b>non cumulée</b> (deux projets simultanés ne comptent qu'une fois) et acquise au cours des <b>10 dernières années</b>.")
     + '<div class="panel" id="cptPanel"></div>'
     + '<div style="margin-top:16px"><b style="font-size:14px">Ajouter un projet</b></div>'
     + '<div class="grid" style="margin-top:10px">'
@@ -493,7 +493,8 @@ function sExperience(b){
     + '<textarea id="pdesc" placeholder="En tant que ..., j\'ai planifié et piloté ... (Quoi). J\'ai utilisé ... (Comment). Résultat : ... (mesurable)."></textarea></div>'
     + '<div class="panel" id="qualite" style="margin-top:10px"></div>'
     + '<button class="btn ghost" style="margin-top:12px" onclick="addProj()">＋ Ajouter ce projet au dossier</button>'
-    + '<div style="margin-top:14px"><button class="btn ghost" style="background:var(--lightgold);color:#8a6410" onclick="loadExemple()">Voir un exemple de description forte</button></div>';
+    + '<div style="margin-top:14px"><button class="btn ghost" style="background:var(--lightgold);color:#8a6410" onclick="loadExemple()">Voir un exemple de structure (condensé)</button></div>'
+    + '<p class="note">L\'exemple montre la structure en quelques lignes ; dans le formulaire réel, développez chaque partie, sans gonfler votre rôle.</p>';
   renderCounter(); wireQuality();
 }
 function renderCounter(){
@@ -562,7 +563,7 @@ window.loadExemple=()=>{
 window.setForm35=v=>{ state.form35=v; const h=document.getElementById("validhint35"); if(h) h.style.display=v?"none":"block"; };
 function sForm35(b){
   b.innerHTML =
-    tip("<b>Vos 35 heures sont validées</b> par votre formation SAMethod. Conservez précieusement votre <b>attestation (certificat de formation)</b> : c'est un justificatif clé en cas d'audit.") + '<div class="panel" style="background:var(--lightgreen);border-color:#BFE3BC;margin-bottom:14px"><b style="font-size:13px;color:var(--green-ink)">Bon à savoir — la dispense CAPM</b><div class="note" style="margin-top:5px;color:var(--ink)">Si vous détenez une certification <b>CAPM® active</b>, vous êtes <b>dispensé(e)</b> de documenter les 35 heures : elle vaut à elle seule les 35 heures de formation exigées.</div></div>'
+    tip("<b>Déclarez au moins 35 heures</b> de formation en management de projet (seules les heures réellement suivies comptent). Conservez précieusement votre <b>attestation datée</b> : c'est un justificatif clé en cas d'audit. <b>À partir du 1er décembre 2026</b>, une formation <b>en direct</b> ne comptera que si elle est dispensée par un partenaire agréé du PMI (ATP), un prestataire agréé en Chine (REP) ou un programme académique éligible ; selon le PMI, une formation <b>terminée avant cette date</b> reste éligible selon les règles en vigueur au moment où elle a été suivie.") + '<div class="panel" style="background:var(--lightgreen);border-color:#BFE3BC;margin-bottom:14px"><b style="font-size:13px;color:var(--green-ink)">Bon à savoir — la dispense CAPM</b><div class="note" style="margin-top:5px;color:var(--ink)">Si vous détenez une certification <b>CAPM® active</b>, vous êtes <b>dispensé(e)</b> de documenter les 35 heures : elle vaut à elle seule les 35 heures de formation exigées.</div></div>'
     + '<div class="grid">'
     + '<div class="field"><label>Organisme de formation</label><input type="text" value="SAMethod" readonly></div>'
     + '<div class="field"><label>Heures de formation (contact hours)</label><input type="text" value="35 heures" readonly></div>'
@@ -594,7 +595,7 @@ function sReviewPMI(b){
     '<div class="status"><div class="ring" style="background:var(--blue)"><div class="spin"></div></div>'
     + '<h3>Dossier en cours de revue…</h3><p>Le PMI vérifie la <b>complétude</b> de votre candidature. Le délai est généralement d\'environ <b>5 jours ouvrés</b>.</p></div>'
     + '<div id="reviewDone" style="display:none">'
-    + tip("<b>Bon à savoir :</b> à ce stade, le PMI vérifie que le dossier est complet — il ne juge pas encore le fond projet par projet. Le paiement n'intervient qu'après l'approbation.")
+    + tip("<b>Bon à savoir :</b> le paiement n'intervient qu'après l'acceptation du dossier. Si votre dossier est sélectionné pour un audit, vous en êtes informé(e) par e-mail <b>avant</b> le paiement.")
     + '</div>';
   setTimeout(()=>{
     const r=$("#body"); if(!r||steps[i].name!=="Revue PMI") return;
@@ -610,7 +611,7 @@ function sAudit(b){
     tip("<b>L'audit est une sélection ALÉATOIRE</b>, pas une accusation. Un dossier honnête et documenté le passe sans difficulté. Préparez vos justificatifs <b>à l'avance</b> et prévenez vos signataires.")
     + '<div id="auditBox" class="status">'
     + '<div class="ring" style="background:var(--gold)">?</div><h3>Suis-je audité ?</h3>'
-    + '<p>Le PMI tire au sort une partie des dossiers. Lancez la simulation pour découvrir votre cas.</p>'
+    + '<p>Le PMI tire au sort une partie des dossiers. Lancez la simulation pour découvrir votre cas.<br><span style="font-size:12px">(Dans ce simulateur, une chance sur deux pour les besoins de la démonstration ; en réalité, seul un pourcentage des dossiers est audité.)</span></p>'
     + '<button class="btn next" style="margin-top:16px" onclick="rollAudit()">Simuler la sélection d\'audit</button></div>';
 }
 window.rollAudit=()=>{
@@ -620,11 +621,11 @@ window.rollAudit=()=>{
   if(audited){
     box.innerHTML =
       '<div class="ring" style="background:var(--coral)">!</div><h3>Vous êtes audité·e</h3>'
-      + '<p>Rien d\'inquiétant : vous avez généralement <b>90 jours</b> pour fournir les justificatifs. Votre dossier est simplement mis en pause.</p>'
+      + '<p>Rien d\'inquiétant : vous avez <b>90 jours</b> pour fournir les justificatifs, traités ensuite en 5 à 7 jours ouvrés environ. Sans réponse dans le délai : audit échoué et <b>suspension d\'un an</b>.</p>'
       + '<ul class="doclist">'
       + '<li><span class="d">1</span><div><b>Copie du diplôme</b> correspondant à votre voie d\'éligibilité.</div></li>'
-      + '<li><span class="d">2</span><div><b>Vérification d\'expérience</b> : signatures de vos managers / clients confirmant les projets déclarés.</div></li>'
-      + '<li><span class="d">3</span><div><b>Certificat des 35 heures</b> (votre attestation SAMethod).</div></li>'
+      + '<li><span class="d">2</span><div><b>Vérification d\'expérience</b> : signature d\'un superviseur ou manager pour chaque expérience déclarée.</div></li>'
+      + '<li><span class="d">3</span><div><b>Attestation(s) de formation</b> pour chaque cours déclaré (votre attestation SAMethod).</div></li>'
       + '</ul>'
       + '<button class="btn go" style="margin-top:16px" onclick="clearAudit()">J\'ai fourni mes justificatifs → continuer</button>';
   } else {
@@ -636,7 +637,7 @@ window.rollAudit=()=>{
 window.clearAudit=()=>{
   $("#auditBox").innerHTML =
     '<div class="ring" style="background:var(--green)">✓</div><h3>Audit validé</h3>'
-    + '<p>Vos justificatifs sont conformes à votre dossier. La candidature est <b>approuvée</b>. Vous pouvez passer au paiement.</p>';
+    + '<p>Vos justificatifs sont conformes à votre dossier. La candidature est <b>approuvée</b> et votre année d\'éligibilité démarre. Vous pouvez passer au paiement.</p>';
 };
 
 function sPaiement(b){
@@ -670,9 +671,7 @@ function sPaiement(b){
     + '<div style="display:flex;gap:8px"><input type="text" id="vouCode" placeholder="Ex. : SAM-XXXX-XXXX"><button class="btn ghost" onclick="applyVoucher()">Appliquer</button></div></div>'
     + '<div id="vouMsg"></div>'
     + '<ul class="doclist" style="margin-top:14px;max-width:none">'
-    + '<li><span class="d">!</span><div>Une <b>adhésion PMI active</b> est généralement requise pour utiliser un bon PMP.</div></li>'
-    + '<li><span class="d">⏱</span><div>Un bon a une <b>durée de validité</b> (souvent environ 6 mois à compter de son émission).</div></li>'
-    + '<li><span class="d">✕</span><div>Il est en général <b>non remboursable</b> une fois la demande initiée.</div></li>'
+    + '<li><span class="d">!</span><div>Chaque bon a ses <b>conditions</b> (validité, adhésion éventuellement requise, remboursement) : lisez-les avant de l\'utiliser.</div></li>'
     + '<li><span class="d">✓</span><div><b>Vérifiez toujours le montant final</b> après application du bon, avant de valider.</div></li>'
     + '</ul>'
     + '<button class="btn go" id="vouPay" style="margin-top:14px;display:none" onclick="payer(\'bon appliqué\')">Valider avec le bon (simulation)</button>'
@@ -693,11 +692,11 @@ window.applyVoucher=()=>{
   msg.innerHTML='<div class="panel" style="margin-top:12px;background:var(--lightgreen);border-color:#BFE3BC"><b style="color:var(--green-ink)">✓ Bon appliqué (simulation)</b><div class="note" style="margin-top:5px;color:var(--ink)">Nouveau total : <b>0</b>. Dans la réalité, le total se met à jour selon la valeur du bon — vérifiez-le avant de confirmer.</div></div>';
   $("#feeAmt").textContent="0 (bon appliqué)"; pay.style.display="inline-block";
 };
-window.payer=(via)=>{ $("#payOk").innerHTML='<div class="status" style="margin-top:16px"><div class="ring" style="background:var(--green)">✓</div><h3>Paiement simulé accepté</h3><p>Règlement enregistré ('+(via||"")+'). Votre période d\'éligibilité d\'un an démarre : vous pouvez maintenant planifier l\'examen.</p></div>'; };
+window.payer=(via)=>{ $("#payOk").innerHTML='<div class="status" style="margin-top:16px"><div class="ring" style="background:var(--green)">✓</div><h3>Paiement simulé accepté</h3><p>Règlement enregistré ('+(via||"")+'). Vous pouvez maintenant planifier l\'examen, dans votre année d\'éligibilité (comptée depuis l\'approbation du dossier ou la validation de l\'audit).</p></div>'; };
 
 function sPlanifier(b){
   b.innerHTML =
-    tip("<b>Vous avez un an</b> pour passer l'examen, avec jusqu'à <b>3 tentatives</b>. Réservez tôt pour obtenir la date et le créneau souhaités.")
+    tip("<b>Vous avez un an</b> pour passer l'examen, avec jusqu'à <b>3 tentatives</b> (frais à repayer pour les 2e et 3e). Réservez tôt pour obtenir la date et le créneau souhaités. L'examen : 180 questions, 240 minutes, 2 pauses de 10 minutes.")
     + '<div class="choices">'
     + '<div class="choice sel" onclick="this.parentNode.querySelectorAll(\'.choice\').forEach(c=>c.classList.remove(\'sel\'));this.classList.add(\'sel\')"><span class="badge">✓ choisi</span><h4>Centre d\'examen</h4><p>Passage sur place dans un centre agréé Pearson VUE.</p></div>'
     + '<div class="choice" onclick="this.parentNode.querySelectorAll(\'.choice\').forEach(c=>c.classList.remove(\'sel\'));this.classList.add(\'sel\')"><span class="badge">✓ choisi</span><h4>En ligne surveillé</h4><p>Depuis chez vous, sous surveillance à distance (proctoring).</p></div>'
@@ -706,7 +705,7 @@ function sPlanifier(b){
     + f("Date souhaitée","text","exdate","JJ/MM/AAAA")
     + f("Créneau","text","exslot","Matin")
     + '</div>'
-    + '<p class="note">Rappel : réalisez l\'examen blanc SAMethod (4h, conditions réelles) avant la Séance 20.</p>';
+    + '<p class="note">Rappel : avant de réserver, réalisez au moins deux examens blancs SAMethod complets (180 questions, 240 minutes) en conditions réelles. Report gratuit jusqu\'à 30 jours avant le rendez-vous ; 70 $ dans les 30 jours ; plus aucun report à moins de 48 heures.</p>';
 }
 
 function sFin(b){
@@ -722,7 +721,7 @@ function sFin(b){
     + row("35 heures", state.form35?"Confirmées (SAMethod)":"—")
     + row("Audit", state.audite===true?"Passé avec justificatifs":state.audite===false?"Non sélectionné":"—")
     + '</div>'
-    + tip("<b>Et maintenant, pour de vrai :</b> constituez votre dossier sur <b>pmi.org</b> avec la même méthode. Gardez diplôme, attestation SAMethod et signataires prêts. Et réalisez l'examen blanc avant la Séance 20.")
+    + tip("<b>Et maintenant, pour de vrai :</b> constituez votre dossier sur <b>pmi.org</b> avec la même méthode. Gardez diplôme, attestation SAMethod et signataires prêts. Et entraînez-vous sur les examens blancs SAMethod avant de réserver votre date.")
     + '<p class="note" style="text-align:center">Cliquez sur « Recommencer » pour rejouer la démo avec d\'autres choix.</p>';
 }
 
