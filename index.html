@@ -288,37 +288,37 @@ const steps = [
   {name:"Accueil", short:"Départ", eyebrow:"Simulateur · Candidature PMP", title:"Le parcours de candidature PMP, pas à pas",
    sub:"Vous allez suivre chaque étape réelle du dépôt de dossier — comme si vous y étiez.", render:sAccueil, valid:()=>true},
 
-  {name:"Compte PMI", short:"Compte PMI", eyebrow:"Étape 1 sur 10", title:"Créer votre compte sur PMI.org",
+  {name:"Compte PMI", short:"Compte PMI", eyebrow:"Étape 1 sur 11", title:"Créer votre compte sur PMI.org",
    sub:"Tout commence par un compte gratuit sur le site du PMI.", render:sCompte, valid:()=>state.membre!==null},
 
-  {name:"Éligibilité", short:"Éligibilité", eyebrow:"Étape 2 sur 10", title:"Vérifier votre éligibilité",
+  {name:"Éligibilité", short:"Éligibilité", eyebrow:"Étape 2 sur 11", title:"Vérifier votre éligibilité",
    sub:"Quatre voies possibles selon votre niveau d'études. Choisissez la vôtre.", render:sEligibilite, valid:()=>state.voie!==null},
 
-  {name:"Coordonnées", short:"Coordonnées", eyebrow:"Étape 3 sur 10", title:"Vos informations personnelles",
+  {name:"Coordonnées", short:"Coordonnées", eyebrow:"Étape 3 sur 11", title:"Vos informations personnelles",
    sub:"Les coordonnées doivent correspondre à votre pièce d'identité.", render:sCoord, valid:()=>true},
 
-  {name:"Diplôme", short:"Diplôme", eyebrow:"Étape 4 sur 10", title:"Votre formation (diplôme)",
+  {name:"Diplôme", short:"Diplôme", eyebrow:"Étape 4 sur 11", title:"Votre formation (diplôme)",
    sub:"Renseignez le diplôme qui correspond à votre voie d'éligibilité.", render:sDiplome, valid:()=>true},
 
-  {name:"Expérience", short:"Expérience", eyebrow:"Étape 5 sur 10", title:"Votre expérience projet",
+  {name:"Expérience", short:"Expérience", eyebrow:"Étape 5 sur 11", title:"Votre expérience projet",
    sub:"Le cœur du dossier. Ajoutez vos projets et rédigez chaque description.", render:sExperience, valid:()=>true},
 
-  {name:"35 heures", short:"35 heures", eyebrow:"Étape 6 sur 10", title:"Vos 35 heures de formation",
+  {name:"35 heures", short:"35 heures", eyebrow:"Étape 6 sur 11", title:"Vos 35 heures de formation",
    sub:"La formation en gestion de projet exigée par le PMI.", render:sForm35, valid:()=>state.form35},
 
-  {name:"Soumission", short:"Soumission", eyebrow:"Étape 7 sur 10", title:"Révision et soumission",
+  {name:"Soumission", short:"Soumission", eyebrow:"Étape 7 sur 11", title:"Révision et soumission",
    sub:"Relisez l'ensemble, vérifiez la cohérence, puis soumettez.", render:sRevue, valid:()=>true},
 
-  {name:"Revue PMI", short:"Revue PMI", eyebrow:"Étape 8 sur 10", title:"Revue par le PMI",
+  {name:"Revue PMI", short:"Revue PMI", eyebrow:"Étape 8 sur 11", title:"Revue par le PMI",
    sub:"Le PMI vérifie la complétude de votre dossier.", render:sReviewPMI, valid:()=>true},
 
-  {name:"Audit", short:"Audit", eyebrow:"Étape 9 sur 10", title:"L'audit (éventuel)",
+  {name:"Audit", short:"Audit", eyebrow:"Étape 9 sur 11", title:"L'audit (éventuel)",
    sub:"Une partie des dossiers est sélectionnée aléatoirement.", render:sAudit, valid:()=>true},
 
-  {name:"Paiement", short:"Paiement", eyebrow:"Étape 10 sur 10", title:"Paiement des frais d'examen",
+  {name:"Paiement", short:"Paiement", eyebrow:"Étape 10 sur 11", title:"Paiement des frais d'examen",
    sub:"On ne paie qu'une fois le dossier approuvé.", render:sPaiement, valid:()=>true},
 
-  {name:"Planifier", short:"Planifier", eyebrow:"Dernière étape", title:"Planifier votre examen",
+  {name:"Planifier", short:"Planifier", eyebrow:"Étape 11 sur 11 · dernière étape", title:"Planifier votre examen",
    sub:"Vous disposez d'un an pour passer l'examen, avec 3 tentatives.", render:sPlanifier, valid:()=>true},
 
   {name:"Terminé", short:"Fin", eyebrow:"Parcours terminé", title:"Vous connaissez tout le parcours !",
@@ -335,7 +335,7 @@ function paint(){
   $("#title").textContent = st.title;
   $("#sub").textContent = st.sub;
   $("#stName").textContent = st.name;
-  $("#stCount").textContent = "Étape "+(i)+" / "+(steps.length-1);
+  $("#stCount").textContent = i===0 ? "Départ" : (i===steps.length-1 ? "Terminé" : "Étape "+i+" / "+(steps.length-2));
   const pct = i/(steps.length-1)*100;
   $("#fill").style.width = pct+"%";
   $("#stepper").style.setProperty("--glow", (10+pct*0.8)+"%");
@@ -608,7 +608,7 @@ function sReviewPMI(b){
 
 function sAudit(b){
   b.innerHTML =
-    tip("<b>L'audit est une sélection ALÉATOIRE</b>, pas une accusation. Un dossier honnête et documenté le passe sans difficulté. Préparez vos justificatifs <b>à l'avance</b> et prévenez vos signataires.")
+    tip("<b>L'audit est une sélection ALÉATOIRE</b>, pas une accusation. Un dossier honnête et documenté le passe sans difficulté. Préparez vos justificatifs <b>à l'avance</b> et prévenez vos signataires. Si votre dossier est sélectionné, le PMI vous prévient par e-mail <b>avant le paiement</b> des frais d'examen, et vous ne pouvez pas poursuivre tant que l'audit n'est pas terminé.")
     + '<div id="auditBox" class="status">'
     + '<div class="ring" style="background:var(--gold)">?</div><h3>Suis-je audité ?</h3>'
     + '<p>Le PMI tire au sort une partie des dossiers. Lancez la simulation pour découvrir votre cas.<br><span style="font-size:12px">(Dans ce simulateur, une chance sur deux pour les besoins de la démonstration ; en réalité, seul un pourcentage des dossiers est audité.)</span></p>'
@@ -656,7 +656,7 @@ function sPaiement(b){
     + '<div id="panCard">'
     + '<div class="grid">'
     + '<div class="field"><label>Numéro de carte</label><input type="text" value="•••• •••• •••• •••• (simulation)" disabled style="color:var(--muted)"></div>'
-    + '<div class="field"><label>Titulaire</label><input type="text" placeholder="Comme sur la carte"></div>'
+    + '<div class="field"><label>Titulaire</label><input type="text" value="Prénom Nom (simulation)" disabled style="color:var(--muted)"></div>'
     + '</div>'
     + '<p class="note warn">Ne saisissez jamais de vrai numéro de carte ici : ceci est une simulation. Le paiement réel se fait uniquement sur pmi.org.</p>'
     + '<button class="btn go" style="margin-top:4px" onclick="payer(\'par carte\')">Payer par carte (simulation)</button>'
